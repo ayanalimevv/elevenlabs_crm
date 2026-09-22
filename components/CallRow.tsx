@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { CallLog, Contact } from "@prisma/client";
-import { OUTCOME_COLORS, OUTCOME_LABELS } from "@/lib/outcome";
+import { OUTCOME_COLORS, OUTCOME_DOT, OUTCOME_LABELS } from "@/lib/outcome";
 
 type CallWithContact = CallLog & { contact: Contact };
 
@@ -13,6 +13,16 @@ function formatDuration(seconds: number | null): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function formatDate(date: Date | null): string {
+  if (!date) return "—";
+  return new Date(date).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 function transcriptTurns(transcript: unknown): { role: string; message: string }[] {
   if (!Array.isArray(transcript)) return [];
   return transcript
@@ -20,70 +30,102 @@ function transcriptTurns(transcript: unknown): { role: string; message: string }
       (t): t is { role: unknown; message: unknown } =>
         typeof t === "object" && t !== null && "role" in t && "message" in t,
     )
-    .map((t) => ({ role: String(t.role), message: String(t.message ?? "") }));
+    .map((t) => ({ role: String(t.role), message: String(t.message ?? "") }))
+    .filter((t) => t.message.trim().length > 0);
 }
 
 export function CallRow({ call }: { call: CallWithContact }) {
   const [open, setOpen] = useState(false);
   const turns = transcriptTurns(call.transcript);
+  const isPlaceholderPhone = call.contact.phone.startsWith("unknown-");
 
   return (
-    <div className="p-4">
+    <div>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full flex-wrap items-center gap-4 text-left"
+        className="flex w-full flex-wrap items-center gap-4 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.03]"
       >
-        <span className="w-36 shrink-0 text-sm text-neutral-500">
-          {call.startedAt ? new Date(call.startedAt).toLocaleString() : "—"}
-        </span>
-        <span className="min-w-[140px] flex-1 text-sm font-medium text-neutral-100">
-          {call.contact.firstName ?? "Unknown"}
-          {call.contact.company ? ` · ${call.contact.company}` : ""}
-        </span>
-        <span className="w-36 shrink-0 text-sm text-neutral-400">{call.contact.phone}</span>
-        <span
-          className={`shrink-0 rounded-full border px-2 py-0.5 text-xs ${OUTCOME_COLORS[call.outcome]}`}
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          className={`h-4 w-4 shrink-0 text-zinc-600 transition-transform duration-150 ${open ? "rotate-90" : ""}`}
         >
+          <path strokeLinecap="round" strokeLinejoin="round" d="m7.5 4.5 5 5.5-5 5.5" />
+        </svg>
+
+        <span className="w-32 shrink-0 text-sm text-zinc-500">{formatDate(call.startedAt)}</span>
+
+        <span className="min-w-[140px] flex-1 truncate text-sm font-medium text-zinc-100">
+          {call.contact.firstName || "Unknown"}
+          {call.contact.company && <span className="text-zinc-500"> · {call.contact.company}</span>}
+        </span>
+
+        <span className="w-32 shrink-0 truncate text-sm text-zinc-500">
+          {isPlaceholderPhone ? "—" : call.contact.phone}
+        </span>
+
+        <span
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${OUTCOME_COLORS[call.outcome]}`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${OUTCOME_DOT[call.outcome]}`} />
           {OUTCOME_LABELS[call.outcome]}
         </span>
-        <span className="w-14 shrink-0 text-right text-sm text-neutral-500">
+
+        <span className="w-12 shrink-0 text-right font-mono text-sm text-zinc-500">
           {formatDuration(call.durationSeconds)}
         </span>
       </button>
 
       {open && (
-        <div className="mt-4 space-y-3 rounded-lg border border-neutral-800 bg-neutral-900/50 p-4 text-sm">
-          {call.summary && (
-            <p className="text-neutral-300">
-              <span className="text-neutral-500">Summary: </span>
-              {call.summary}
-            </p>
+        <div className="animate-fade-in space-y-4 border-t border-white/5 bg-black/20 px-4 py-4 pl-11 text-sm">
+          {call.summary && <p className="leading-relaxed text-zinc-300">{call.summary}</p>}
+
+          {(call.capturedEmail || call.meetingTime) && (
+            <div className="flex flex-wrap gap-x-8 gap-y-2">
+              {call.capturedEmail && (
+                <div className="flex items-center gap-2">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4 text-zinc-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5.5h14a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Zm0 0 7 5.5 7-5.5" />
+                  </svg>
+                  <span className="text-zinc-300">{call.capturedEmail}</span>
+                </div>
+              )}
+              {call.meetingTime && (
+                <div className="flex items-center gap-2">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-4 w-4 text-zinc-600">
+                    <rect x="3" y="4" width="14" height="13" rx="2" />
+                    <path strokeLinecap="round" d="M3 8h14M7 2v3m6-3v3" />
+                  </svg>
+                  <span className="text-zinc-300">{call.meetingTime}</span>
+                </div>
+              )}
+            </div>
           )}
-          <div className="flex flex-wrap gap-6 text-neutral-400">
-            {call.capturedEmail && (
-              <p>
-                <span className="text-neutral-500">Email: </span>
-                {call.capturedEmail}
-              </p>
-            )}
-            {call.meetingTime && (
-              <p>
-                <span className="text-neutral-500">Meeting time: </span>
-                {call.meetingTime}
-              </p>
-            )}
-          </div>
+
           {turns.length > 0 && (
-            <div className="max-h-80 space-y-2 overflow-y-auto border-t border-neutral-800 pt-3">
-              {turns.map((t, i) => (
-                <p key={i} className="text-neutral-300">
-                  <span className="font-medium text-neutral-500">
-                    {t.role === "agent" ? "Aria" : "Contact"}:{" "}
-                  </span>
-                  {t.message}
-                </p>
-              ))}
+            <div className="max-h-80 space-y-2.5 overflow-y-auto border-t border-white/5 pt-4">
+              {turns.map((t, i) => {
+                const isAgent = t.role === "agent";
+                return (
+                  <div key={i} className={`flex ${isAgent ? "justify-start" : "justify-end"}`}>
+                    <div
+                      className={`max-w-[80%] rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
+                        isAgent
+                          ? "rounded-tl-sm bg-white/5 text-zinc-300"
+                          : "rounded-tr-sm bg-indigo-500/15 text-indigo-100"
+                      }`}
+                    >
+                      <p className="mb-0.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+                        {isAgent ? "Aria" : call.contact.firstName || "Contact"}
+                      </p>
+                      {t.message}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

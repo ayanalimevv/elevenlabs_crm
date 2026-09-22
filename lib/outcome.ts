@@ -11,11 +11,21 @@ export const OUTCOME_LABELS: Record<CallOutcome, string> = {
 };
 
 export const OUTCOME_COLORS: Record<CallOutcome, string> = {
-  MEETING_BOOKED_LIVE: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  MEETING_BOOKED_EMAIL: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-  INTERESTED_INFO_SENT: "bg-sky-500/15 text-sky-400 border-sky-500/30",
-  NOT_INTERESTED: "bg-neutral-500/15 text-neutral-400 border-neutral-500/30",
-  VOICEMAIL: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  NO_ANSWER_FAILED: "bg-red-500/15 text-red-400 border-red-500/30",
-  UNKNOWN: "bg-neutral-500/10 text-neutral-500 border-neutral-500/20",
+  MEETING_BOOKED_LIVE: "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/25",
+  MEETING_BOOKED_EMAIL: "bg-emerald-500/10 text-emerald-300 ring-1 ring-inset ring-emerald-500/20",
+  INTERESTED_INFO_SENT: "bg-sky-500/10 text-sky-300 ring-1 ring-inset ring-sky-500/25",
+  NOT_INTERESTED: "bg-white/5 text-zinc-400 ring-1 ring-inset ring-white/10",
+  VOICEMAIL: "bg-amber-500/10 text-amber-300 ring-1 ring-inset ring-amber-500/25",
+  NO_ANSWER_FAILED: "bg-red-500/10 text-red-300 ring-1 ring-inset ring-red-500/25",
+  UNKNOWN: "bg-white/5 text-zinc-500 ring-1 ring-inset ring-white/10",
+};
+
+export const OUTCOME_DOT: Record<CallOutcome, string> = {
+  MEETING_BOOKED_LIVE: "bg-emerald-400",
+  MEETING_BOOKED_EMAIL: "bg-emerald-400",
+  INTERESTED_INFO_SENT: "bg-sky-400",
+  NOT_INTERESTED: "bg-zinc-500",
+  VOICEMAIL: "bg-amber-400",
+  NO_ANSWER_FAILED: "bg-red-400",
+  UNKNOWN: "bg-zinc-600",
 };
