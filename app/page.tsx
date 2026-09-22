@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { CallOutcome, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { OUTCOME_LABELS } from "@/lib/outcome";
 import { CallRow } from "@/components/CallRow";
+import { OutcomeFilter } from "@/components/OutcomeFilter";
 
 const OUTCOME_OPTIONS = Object.values(CallOutcome);
 
@@ -120,30 +120,7 @@ export default async function DashboardPage({
             />
           </div>
 
-          <div className="relative">
-            <select
-              name="outcome"
-              defaultValue={outcome ?? ""}
-              style={{ colorScheme: "dark" }}
-              className="h-10 appearance-none rounded-lg border border-white/10 bg-zinc-900/60 py-0 pr-9 pl-3.5 text-sm text-zinc-100 outline-none transition-colors focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-400/20"
-            >
-              <option value="">All outcomes</option>
-              {OUTCOME_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {OUTCOME_LABELS[o]}
-                </option>
-              ))}
-            </select>
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-zinc-500"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m5.5 8 4.5 4.5L14.5 8" />
-            </svg>
-          </div>
+          <OutcomeFilter value={outcome ?? ""} />
 
           <button
             type="submit"
