@@ -59,9 +59,15 @@ export default async function DashboardPage({
 }) {
   const { outcome, q } = await searchParams;
 
+  const outcomeList = (outcome ?? "")
+    .split(",")
+    .filter((o): o is CallOutcome => OUTCOME_OPTIONS.includes(o as CallOutcome));
+
   const where: Prisma.CallLogWhereInput = {};
-  if (outcome && OUTCOME_OPTIONS.includes(outcome as CallOutcome)) {
-    where.outcome = outcome as CallOutcome;
+  if (outcomeList.length === 1) {
+    where.outcome = outcomeList[0];
+  } else if (outcomeList.length > 1) {
+    where.outcome = { in: outcomeList };
   }
   if (q) {
     where.contact = {
@@ -93,13 +99,17 @@ export default async function DashboardPage({
   const interested = countFor([CallOutcome.INTERESTED_INFO_SENT]);
   const notInterested = countFor([CallOutcome.NOT_INTERESTED]);
 
-  function filterHref(nextOutcome?: CallOutcome) {
+  function filterHref(nextOutcome?: CallOutcome | CallOutcome[]) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
-    if (nextOutcome) params.set("outcome", nextOutcome);
+    const list = nextOutcome ? (Array.isArray(nextOutcome) ? nextOutcome : [nextOutcome]) : [];
+    if (list.length > 0) params.set("outcome", list.join(","));
     const s = params.toString();
     return s ? `/?${s}` : "/";
   }
+
+  const isExactly = (outcomes: CallOutcome[]) =>
+    outcomeList.length === outcomes.length && outcomes.every((o) => outcomeList.includes(o));
 
   return (
     <div className="min-h-screen bg-zinc-950 px-6 py-10 text-zinc-100">
@@ -131,21 +141,27 @@ export default async function DashboardPage({
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label="Total calls" value={total} href={filterHref()} active={!outcome} />
-          <StatCard label="Meetings booked" value={meetingsBooked} accent="text-emerald-300" />
+          <StatCard label="Total calls" value={total} href={filterHref()} active={outcomeList.length === 0} />
+          <StatCard
+            label="Meetings booked"
+            value={meetingsBooked}
+            accent="text-emerald-300"
+            href={filterHref(MEETING_OUTCOMES)}
+            active={isExactly(MEETING_OUTCOMES)}
+          />
           <StatCard
             label="Interested"
             value={interested}
             accent="text-sky-300"
             href={filterHref(CallOutcome.INTERESTED_INFO_SENT)}
-            active={outcome === CallOutcome.INTERESTED_INFO_SENT}
+            active={isExactly([CallOutcome.INTERESTED_INFO_SENT])}
           />
           <StatCard
             label="Not interested"
             value={notInterested}
             accent="text-zinc-400"
             href={filterHref(CallOutcome.NOT_INTERESTED)}
-            active={outcome === CallOutcome.NOT_INTERESTED}
+            active={isExactly([CallOutcome.NOT_INTERESTED])}
           />
         </div>
 

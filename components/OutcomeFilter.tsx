@@ -60,7 +60,8 @@ export function OutcomeFilter({ value }: { value: string }) {
     router.push(params.size > 0 ? `/?${params.toString()}` : "/");
   }
 
-  const label = value ? OUTCOME_LABELS[value as CallOutcome] : "All outcomes";
+  const isSingleKnownOutcome = OUTCOME_OPTIONS.includes(value as CallOutcome);
+  const label = !value ? "All outcomes" : isSingleKnownOutcome ? OUTCOME_LABELS[value as CallOutcome] : "Multiple outcomes";
 
   return (
     <div className="relative" ref={containerRef}>
