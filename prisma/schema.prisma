@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  firstName String?
+  company   String?
+  industry  String?
+  painPoint String?
+  buildIdea String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  calls CallLog[]
+}
+
+enum CallOutcome {
+  MEETING_BOOKED_LIVE
+  MEETING_BOOKED_EMAIL
+  INTERESTED_INFO_SENT
+  NOT_INTERESTED
+  VOICEMAIL
+  NO_ANSWER_FAILED
+  UNKNOWN
+}
+
+model CallLog {
+  id                String      @id @default(cuid())
+  contactId         String
+  contact           Contact     @relation(fields: [contactId], references: [id])
+  conversationId    String      @unique
+  startedAt         DateTime?
+  durationSeconds   Int?
+  callStatus        String?
+  outcome           CallOutcome @default(UNKNOWN)
+  capturedEmail     String?
+  meetingTime       String?
+  summary           String?
+  transcript        Json?
+  successEvaluation Boolean?
+  rawPayload        Json
+  createdAt         DateTime    @default(now())
+
+  @@index([contactId])
+  @@index([outcome])
+}
