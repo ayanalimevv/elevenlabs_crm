@@ -68,7 +68,7 @@ export function OutcomeFilter({ value }: { value: string }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 min-w-[190px] items-center justify-between gap-2.5 rounded-lg border border-white/10 bg-zinc-900/60 px-3.5 text-sm outline-none transition-colors hover:border-white/20 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-400/20"
+        className="flex h-10 min-w-[190px] items-center justify-between gap-2.5 rounded-lg border border-white/10 bg-zinc-900/60 px-3.5 text-sm outline-none transition-all hover:border-white/20 focus-visible:border-indigo-400/60 focus-visible:ring-2 focus-visible:ring-indigo-400/20 active:scale-[0.98]"
       >
         <span className={value ? "text-zinc-100" : "text-zinc-500"}>{label}</span>
         <ChevronIcon open={open} />
@@ -79,7 +79,9 @@ export function OutcomeFilter({ value }: { value: string }) {
           <button
             type="button"
             onClick={() => select("")}
-            className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm text-zinc-300 transition-colors hover:bg-white/[0.06]"
+            className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.06] focus-visible:bg-white/[0.06] focus-visible:outline-none ${
+              !value ? "bg-white/[0.04] text-zinc-100" : "text-zinc-300"
+            }`}
           >
             All outcomes
             {!value && <CheckIcon />}
@@ -90,7 +92,9 @@ export function OutcomeFilter({ value }: { value: string }) {
               key={o}
               type="button"
               onClick={() => select(o)}
-              className="flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm text-zinc-300 transition-colors hover:bg-white/[0.06]"
+              className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.06] focus-visible:bg-white/[0.06] focus-visible:outline-none ${
+                value === o ? "bg-white/[0.04] text-zinc-100" : "text-zinc-300"
+              }`}
             >
               {OUTCOME_LABELS[o]}
               {value === o && <CheckIcon />}
